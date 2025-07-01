@@ -28,6 +28,7 @@ __init_uv() {
 
         # mv ./uv-*/uv ~/.local/opt/uv-v0.99.9/bin/uv
         mv ./uv-*/uv "${pkg_src_cmd}"
+        mv ./uv-*/uvx "${pkg_src_dir}/bin/uvx"
     }
 
     # pkg_get_current_version is recommended, but not required
