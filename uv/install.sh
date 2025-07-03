@@ -23,15 +23,18 @@ __init_uv() {
 
     # pkg_install must be defined by every package
     pkg_install() {
-        # ~/.local/opt/uv-v0.99.9/bin
         mkdir -p "$(dirname "${pkg_src_cmd}")"
-
-        # mv ./uv-*/uv ~/.local/opt/uv-v0.99.9/bin/uv
-        mv ./uv-*/uv "${pkg_src_cmd}"
-        mv ./uv-*/uvx "${pkg_src_dir}/bin/uvx"
+        mv ./uv-*/uv* "$(dirname "${pkg_src_cmd}")"
     }
 
-    # pkg_get_current_version is recommended, but not required
+    pkg_link() {
+        ln -s "$pkg_src_cmd" "$pkg_dst_cmd"
+        printf "    Linking: ${pkg_src_cmd} -> ${pkg_dst_cmd}\n"
+        printf "    Linking: ${pkg_src_cmd}x -> ${pkg_dst_cmd}x\n"
+        ln -s "${pkg_src_cmd}x" "${pkg_dst_cmd}x"
+    }
+
+
     pkg_get_current_version() {
         # 'uv --version' has output in this format:
         #       uv 0.99.9 (rev abcdef0123)
