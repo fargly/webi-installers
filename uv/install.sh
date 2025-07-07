@@ -4,6 +4,7 @@
 # "'pkg_cmd_name' appears unused. Verify it or export it."
 
 __init_uv() {
+
     set -e
     set -u
 
@@ -12,6 +13,7 @@ __init_uv() {
     ##################
 
     # Every package should define these 6 variables
+    pkg_no_exec=1
     pkg_cmd_name="uv"
 
     pkg_dst_cmd="$HOME/.local/bin/uv"
@@ -21,30 +23,24 @@ __init_uv() {
     pkg_src_dir="$HOME/.local/opt/uv-v$WEBI_VERSION"
     pkg_src="$pkg_src_cmd"
 
-    # pkg_install must be defined by every package
-    pkg_install() {
-        mkdir -p "$(dirname "${pkg_src_cmd}")"
-        mv ./uv-*/uv* "$(dirname "${pkg_src_cmd}")"
-    }
+    ## Make Directory
+    mkdir -p "$(dirname "${pkg_src_cmd}")"
+    
+    ## Injected Variables
+    SHELL_INSTALL_URL="https://github.com/astral-sh/uv/releases/download/$WEBI_VERSION/uv-installer.sh"
+    UV_NO_MODIFY_PATH=1
+    HOME="$pkg_src_dir"
+    XDG_BIN_HOME="$pkg_src_dir/bin"
+    PRINT_QUIET=1
+    
+    ## Invoke curlPipe of uv installer
+    curl -fsSL "$SHELL_INSTALL_URL" | bash
 
-    pkg_link() {
-        ln -s "$pkg_src_cmd" "$pkg_dst_cmd"
-        printf "    Linking: ${pkg_src_cmd} -> ${pkg_dst_cmd}\n"
-        printf "    Linking: ${pkg_src_cmd}x -> ${pkg_dst_cmd}x\n"
-        ln -s "${pkg_src_cmd}x" "${pkg_dst_cmd}x"
-    }
-
-
-    pkg_get_current_version() {
-        # 'uv --version' has output in this format:
-        #       uv 0.99.9 (rev abcdef0123)
-        # This trims it down to just the version number:
-        #       0.99.9
-        uv --version 2> /dev/null |
-            head -n 1 |
-            cut -d ' ' -f 2
-    }
-
+    test -L "$pkg_dst_cmd" && rm "$pkg_dst_cmd"
+    test -L "${pkg_dst_cmd}x" && rm "${pkg_dst_cmd}x"
+    ln -s "$pkg_src_cmd" "$pkg_dst_cmd"
+    ln -s "${pkg_src_cmd}x" "${pkg_dst_cmd}x"
+    
 }
 
 __init_uv
